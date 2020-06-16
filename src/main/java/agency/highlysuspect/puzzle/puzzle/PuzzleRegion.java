@@ -52,7 +52,7 @@ public class PuzzleRegion {
 	}
 	
 	public boolean contains(BlockPos pos) {
-		return start.getX() <= pos.getX() && start.getY() <= pos.getY() && start.getZ() <= pos.getZ() && end.getX() >= pos.getX() && end.getY() >= pos.getY() && end.getZ() >= pos.getZ();
+		return start.getX() <= pos.getX() && start.getY() <= pos.getY() && start.getZ() <= pos.getZ() && end.getX() > pos.getX() && end.getY() > pos.getY() && end.getZ() > pos.getZ();
 	}
 	
 	public void snapshotStartingState(ServerWorld world) {
