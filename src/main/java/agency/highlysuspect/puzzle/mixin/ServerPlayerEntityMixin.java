@@ -24,7 +24,6 @@ public class ServerPlayerEntityMixin {
 		)
 	)
 	private void onChangeDimension(ServerWorld targetWorld, CallbackInfoReturnable<Entity> cir) {
-		Init.LOGGER.error("ON DIMENSION CHANGE");
 		PuzzleServerNet.syncPuzzleRegions(targetWorld.getRegistryKey(), Stream.of((PlayerEntity) (Object) this), PuzzleRegionStateManager.getFor(targetWorld).getRegionListCopy(), true);
 	}
 }

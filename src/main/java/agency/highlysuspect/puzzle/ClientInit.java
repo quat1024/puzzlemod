@@ -16,11 +16,11 @@ public class ClientInit implements ClientModInitializer {
 				return;
 			}
 			
-			if(client.world.getTime() % 20 != 5) return;
-			
-			ClientPuzzleRegionStateManagerManager.forEachKnown((key, mgr) -> {
-				Init.LOGGER.info("world key " + key + " count " + mgr.regionCount());
-			});
+//			if(client.world.getTime() % 20 != 5) return;
+//			
+//			ClientPuzzleRegionStateManagerManager.forEachKnown((key, mgr) -> {
+//				Init.LOGGER.info("world key " + key + " count " + mgr.regionCount());
+//			});
 		});
 	}
 }

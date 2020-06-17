@@ -8,6 +8,8 @@
     "ServerPlayerEntityMixin"
   ],
   "client": [
+    "client.WorldRendererMixin",
+    "client.WorldRendererAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
