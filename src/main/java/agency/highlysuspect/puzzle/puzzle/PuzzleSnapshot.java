@@ -27,12 +27,12 @@ public class PuzzleSnapshot {
 	private static final StructurePlacementData PLACEMENT_RULES = new StructurePlacementData();
 	
 	public void takeSnapshot(ServerWorld world, PuzzleRegion region) {
-		structure.setAuthor(region.name + "-puzzle-snapshot");
-		structure.saveFromWorld(world, region.start, region.end.subtract(region.start), true, Blocks.STRUCTURE_VOID);
+		structure.setAuthor(region.getName() + "-puzzle-snapshot");
+		structure.saveFromWorld(world, region.getStart(), region.getEnd().subtract(region.getStart()), true, Blocks.STRUCTURE_VOID);
 	}
 	
 	public void restoreSnapshot(ServerWorld world, PuzzleRegion region) {
-		structure.place(world, region.start, PLACEMENT_RULES, world.getRandom());
+		structure.place(world, region.getStart(), PLACEMENT_RULES, world.getRandom());
 	}
 	
 	public Structure getStructure() {

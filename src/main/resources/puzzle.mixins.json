@@ -4,6 +4,8 @@
   "package": "agency.highlysuspect.puzzle.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "PlayerManagerMixin",
+    "ServerPlayerEntityMixin"
   ],
   "client": [
   ],

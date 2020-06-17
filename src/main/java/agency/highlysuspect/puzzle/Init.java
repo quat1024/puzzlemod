@@ -21,13 +21,11 @@ public class Init implements ModInitializer {
 	
 	@Override
 	public void onInitialize() {
-		LOGGER.info("hello world!");
-		
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
 			//Todo clean this up this is just for testing.
 			dispatcher.register(CommandManager.literal("puzzle").requires(s -> s.hasPermissionLevel(2)).then(CommandManager.literal("test").executes(s -> {
 				PuzzleRegionStateManager state = PuzzleRegionStateManager.getFor(s.getSource().getWorld());
-				state.addRegion(PuzzleRegion.create(
+				state.putRegion(PuzzleRegion.create(
 					s.getSource().getWorld(),
 					"test",
 					new BlockPos(10, 56, 10),
@@ -36,7 +34,7 @@ public class Init implements ModInitializer {
 				return 0;
 			})).then(CommandManager.literal("add").then(CommandManager.argument("start", BlockPosArgumentType.blockPos()).then(CommandManager.argument("end", BlockPosArgumentType.blockPos()).then(CommandManager.argument("name", StringArgumentType.string()).executes(s -> {
 				PuzzleRegionStateManager state = PuzzleRegionStateManager.getFor(s.getSource().getWorld());
-				state.addRegion(PuzzleRegion.create(
+				state.putRegion(PuzzleRegion.create(
 					s.getSource().getWorld(),
 					StringArgumentType.getString(s, "name"),
 					BlockPosArgumentType.getBlockPos(s, "start"),
@@ -59,6 +57,10 @@ public class Init implements ModInitializer {
 		
 		ServerTickCallback.EVENT.register(server -> {
 			if(server.getTicks() % 10 != 0) return;
+			
+			server.getWorlds().forEach(world -> PuzzleRegionStateManager.getFor(world).handlePartialSync(world));
+			
+			//Debug current region
 			PlayerStream.all(server).findFirst().ifPresent(player -> {
 				PuzzleRegionStateManager state = PuzzleRegionStateManager.getFor(player.getServerWorld());
 				LOGGER.info(state.getRegionIntersecting(player.getBlockPos()).map(PuzzleRegion::getName).orElse("- none -"));

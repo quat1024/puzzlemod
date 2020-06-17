@@ -18,6 +18,9 @@
   "entrypoints": {
     "main": [
       "agency.highlysuspect.puzzle.Init"
+    ],
+    "client": [
+      "agency.highlysuspect.puzzle.ClientInit"
     ]
   },
   "mixins": [

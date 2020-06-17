@@ -8,6 +8,12 @@ import net.minecraft.util.math.BlockPos;
 import java.util.Objects;
 
 public class PuzzleRegion {
+	//Client-only "thin" constructor
+	private PuzzleRegion(String name, BlockPos start, BlockPos end) {
+		this(name, start, end, null);
+	}
+	
+	//Full constructor
 	private PuzzleRegion(String name, BlockPos start, BlockPos end, PuzzleSnapshot startingState) {
 		this.name = name;
 		this.start = start;
@@ -23,16 +29,24 @@ public class PuzzleRegion {
 		return region;
 	}
 	
-	public String name;
-	public BlockPos start;
-	public BlockPos end;
-	public PuzzleSnapshot startingState;
+	private String name;
+	private BlockPos start;
+	private BlockPos end;
+	private PuzzleSnapshot startingState;
+	
+	private boolean needsSync;
 	
 	public static final Codec<PuzzleRegion> CODEC = RecordCodecBuilder.create(inst -> inst.group(
 		Codec.STRING.fieldOf("name").forGetter(PuzzleRegion::getName),
 		BlockPos.field_25064.fieldOf("start").forGetter(PuzzleRegion::getStart),
 		BlockPos.field_25064.fieldOf("end").forGetter(PuzzleRegion::getEnd),
 		PuzzleSnapshot.CODEC.fieldOf("startingState").forGetter(PuzzleRegion::getStartingState)
+	).apply(inst, PuzzleRegion::new));
+	
+	public static final Codec<PuzzleRegion> THIN_CODEC = RecordCodecBuilder.create(inst -> inst.group(
+		Codec.STRING.fieldOf("name").forGetter(PuzzleRegion::getName),
+		BlockPos.field_25064.fieldOf("start").forGetter(PuzzleRegion::getStart),
+		BlockPos.field_25064.fieldOf("end").forGetter(PuzzleRegion::getEnd)
 	).apply(inst, PuzzleRegion::new));
 	
 	public String getName() {
@@ -49,6 +63,14 @@ public class PuzzleRegion {
 	
 	public PuzzleSnapshot getStartingState() {
 		return startingState;
+	}
+	
+	public boolean needsSync() {
+		return needsSync;
+	}
+	
+	public void setNeedsSync(boolean needsSync) {
+		this.needsSync = needsSync;
 	}
 	
 	public boolean contains(BlockPos pos) {
