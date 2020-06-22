@@ -59,12 +59,6 @@ public class Init implements ModInitializer {
 			if(server.getTicks() % 10 != 0) return;
 			
 			server.getWorlds().forEach(world -> PuzzleRegionStateManager.getFor(world).handlePartialSync(world));
-			
-//			//Debug current region
-//			PlayerStream.all(server).findFirst().ifPresent(player -> {
-//				PuzzleRegionStateManager state = PuzzleRegionStateManager.getFor(player.getServerWorld());
-//				LOGGER.info(state.getRegionIntersecting(player.getBlockPos()).map(PuzzleRegion::getName).orElse("- none -"));
-//			});
 		});
 	}
 }
