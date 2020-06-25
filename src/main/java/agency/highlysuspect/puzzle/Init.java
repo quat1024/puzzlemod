@@ -1,6 +1,7 @@
 package agency.highlysuspect.puzzle;
 
 import agency.highlysuspect.puzzle.block.PuzzleBlocks;
+import agency.highlysuspect.puzzle.entity.PuzzleEntities;
 import agency.highlysuspect.puzzle.etc.PuzzleCommand;
 import agency.highlysuspect.puzzle.item.PuzzleItems;
 import agency.highlysuspect.puzzle.net.PuzzleServerNet;
@@ -19,6 +20,7 @@ public class Init implements ModInitializer {
 	public void onInitialize() {
 		PuzzleBlocks.onInitialize();
 		PuzzleItems.onInitialize();
+		PuzzleEntities.onInitialize();
 		
 		PuzzleServerNet.onInitialize();
 		PuzzleCommand.onInitialize();

@@ -1,5 +1,6 @@
 package agency.highlysuspect.puzzle;
 
+import agency.highlysuspect.puzzle.client.PuzzleEntityRenderers;
 import agency.highlysuspect.puzzle.client.PuzzleKeys;
 import agency.highlysuspect.puzzle.net.PuzzleClientNet;
 import agency.highlysuspect.puzzle.world.ClientPuzzleRegionStateManagerManager;
@@ -14,6 +15,7 @@ public class ClientInit implements ClientModInitializer {
 	public void onInitializeClient() {
 		PuzzleClientNet.onInitialize();
 		PuzzleKeys.onInitialize();
+		PuzzleEntityRenderers.onInitialize();
 		
 		ClientTickCallback.EVENT.register(client -> {
 			if(client.world == null) {
