@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "puzzle:block/circle_sign",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "puzzle:block/circle_sign",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "puzzle:block/circle_sign",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "puzzle:block/circle_sign",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "puzzle:block/circle_sign"
+    },
+    "facing=west": {
+      "model": "puzzle:block/circle_sign",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

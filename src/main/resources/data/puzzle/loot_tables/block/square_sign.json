@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "puzzle:white_pillar"
+          "name": "puzzle:square_sign"
         }
       ],
       "conditions": [

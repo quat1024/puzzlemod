@@ -11,7 +11,11 @@
   "block.puzzle.one_white": "Portal - One Face White",
   "block.puzzle.metal_pillar": "Portal - Metal Pillar",
   "block.puzzle.white_pillar": "Portal - White Pillar",
-  
+  "block.puzzle.square_sign": "Square Sign",
+  "block.puzzle.x_sign": "X Sign",
+  "block.puzzle.circle_sign": "Circle Sign",
+  "block.puzzle.dot_sign": "Dot Sign",
+  "block.puzzle.indicator_sign": "Indicator Sign",
   
   "item.puzzle.cheatsey_item": "Cheatsey Item",
   "item.puzzle.cheatsey_item.tooltip": "If this is in your inventory, you can",

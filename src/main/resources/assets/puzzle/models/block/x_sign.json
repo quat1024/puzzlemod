@@ -1,0 +1,6 @@
+{
+  "parent": "puzzle:block/base/sign",
+  "textures": {
+    "sign": "puzzle:block/x_sign"
+  }
+}

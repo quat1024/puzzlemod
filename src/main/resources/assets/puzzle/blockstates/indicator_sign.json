@@ -1,0 +1,56 @@
+{
+  "variants": {
+    "facing=down,powered=false": {
+      "model": "puzzle:block/unchecked_sign",
+      "x": 180
+    },
+    "facing=east,powered=false": {
+      "model": "puzzle:block/unchecked_sign",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north,powered=false": {
+      "model": "puzzle:block/unchecked_sign",
+      "x": 90
+    },
+    "facing=south,powered=false": {
+      "model": "puzzle:block/unchecked_sign",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up,powered=false": {
+      "model": "puzzle:block/unchecked_sign"
+    },
+    "facing=west,powered=false": {
+      "model": "puzzle:block/unchecked_sign",
+      "x": 90,
+      "y": 270
+    },
+    "facing=down,powered=true": {
+      "model": "puzzle:block/checked_sign",
+      "x": 180
+    },
+    "facing=east,powered=true": {
+      "model": "puzzle:block/checked_sign",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north,powered=true": {
+      "model": "puzzle:block/checked_sign",
+      "x": 90
+    },
+    "facing=south,powered=true": {
+      "model": "puzzle:block/checked_sign",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up,powered=true": {
+      "model": "puzzle:block/checked_sign"
+    },
+    "facing=west,powered=true": {
+      "model": "puzzle:block/checked_sign",
+      "x": 90,
+      "y": 270
+    }
+  }
+}
