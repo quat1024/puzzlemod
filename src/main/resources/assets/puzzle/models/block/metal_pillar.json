@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "side": "puzzle:block/small_metal",
+    "bottom": "puzzle:block/small_white",
+    "top": "puzzle:block/small_white"
+  }
+}

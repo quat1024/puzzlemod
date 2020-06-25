@@ -6,6 +6,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.entity.Entity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
@@ -90,6 +91,10 @@ public class PuzzleRegion {
 		return start.getX() <= pos.getX() && start.getY() <= pos.getY() && start.getZ() <= pos.getZ() && end.getX() > pos.getX() && end.getY() > pos.getY() && end.getZ() > pos.getZ();
 	}
 	
+	public boolean entityInside(Entity e) {
+		return contains(e.getBlockPos());
+	}
+	
 	public void snapshotStartingState(ServerWorld world) {
 		snapshots.clear();
 		snapshot(world, "starting-state");
@@ -107,10 +112,6 @@ public class PuzzleRegion {
 		snapshot.takeSnapshot(world, this);
 		snapshots.add(snapshot);
 		undoCursor++;
-		
-		Init.LOGGER.info("snapshot " + reason);
-		Init.LOGGER.info("cursor " + undoCursor);
-		Init.LOGGER.info("snapshots " + snapshots.size());
 	}
 	
 	public void restoreStartingState(ServerWorld world) {
@@ -124,21 +125,13 @@ public class PuzzleRegion {
 	public void undo(ServerWorld world) {
 		restore(world, undoCursor);
 		if(undoCursor > 0) undoCursor--;
-		
-		Init.LOGGER.info("undo ");
-		Init.LOGGER.info("cursor " + undoCursor);
-		Init.LOGGER.info("snapshots " + snapshots.size());
 	}
 	
 	public void redo(ServerWorld world) {
 		if(snapshots.size() > undoCursor + 1) {
 			restore(world, undoCursor + 1);
 			if(undoCursor < snapshots.size() - 1) undoCursor++;
-			
-			Init.LOGGER.info("redo ");
-			Init.LOGGER.info("cursor " + undoCursor);
-			Init.LOGGER.info("snapshots " + snapshots.size());
-		} else Init.LOGGER.error("cannot restore");
+		}
 	}
 	
 	private void fixCorners() {

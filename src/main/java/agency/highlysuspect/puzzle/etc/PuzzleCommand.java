@@ -25,10 +25,10 @@ public class PuzzleCommand {
 	public static void onInitialize() {
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
 			//TODO more robust permissions system.
-			LiteralArgumentBuilder<ServerCommandSource> root = CommandManager.literal("puzzle").requires(PuzzleCommand::isSpicy);
+			LiteralArgumentBuilder<ServerCommandSource> root = CommandManager.literal("puzzle");
 			
 			//Hadouken!
-			LiteralArgumentBuilder<ServerCommandSource> add = CommandManager.literal("add")
+			LiteralArgumentBuilder<ServerCommandSource> add = CommandManager.literal("add").requires(PuzzleCommand::isSpicy)
 				.then(CommandManager.argument("start", BlockPosArgumentType.blockPos())
 					.then(CommandManager.argument("end", BlockPosArgumentType.blockPos())
 						.then(CommandManager.argument("name", StringArgumentType.string())
@@ -44,7 +44,7 @@ public class PuzzleCommand {
 							}))));
 			
 			LiteralArgumentBuilder<ServerCommandSource> baseSnapshot = CommandManager.literal("starting-state");
-			LiteralArgumentBuilder<ServerCommandSource> snapshot = baseSnapshot.then(puzzle(CommandManager.literal("capture"), (state, region) -> c -> {
+			LiteralArgumentBuilder<ServerCommandSource> snapshot = baseSnapshot.then(puzzle(CommandManager.literal("capture").requires(PuzzleCommand::isSpicy), (state, region) -> c -> {
 				region.snapshotStartingState(c.getSource().getWorld());
 				return 0;
 			}));
@@ -54,7 +54,7 @@ public class PuzzleCommand {
 				return 0;
 			}));
 			
-			LiteralArgumentBuilder<ServerCommandSource> remove = CommandManager.literal("remove");
+			LiteralArgumentBuilder<ServerCommandSource> remove = CommandManager.literal("remove").requires(PuzzleCommand::isSpicy);
 			remove = puzzle(remove, (state, region) -> c -> {
 				state.removeRegion(region);
 				return 0;
@@ -96,18 +96,6 @@ public class PuzzleCommand {
 	//i dont know what im DOING!!!
 	private interface Piss {
 		Optional<PuzzleRegion> piss(PuzzleRegionStateManager state) throws CommandSyntaxException;
-	}
-	
-	private static class AugmentedCommandSource {
-		public AugmentedCommandSource(PuzzleRegionStateManager state, PuzzleRegion region, ServerCommandSource source) {
-			this.state = state;
-			this.region = region;
-			this.source = source;
-		}
-		
-		public final PuzzleRegionStateManager state;
-		public final PuzzleRegion region;
-		public final ServerCommandSource source;
 	}
 	
 	private static boolean isSpicy(ServerCommandSource src) {

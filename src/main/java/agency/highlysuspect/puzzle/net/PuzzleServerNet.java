@@ -6,6 +6,7 @@ import agency.highlysuspect.puzzle.world.PuzzleRegionStateManager;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.network.PacketContext;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.fabricmc.fabric.api.server.PlayerStream;
 import net.minecraft.datafixer.NbtOps;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
@@ -13,26 +14,43 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
+import org.apache.logging.log4j.util.TriConsumer;
 
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 public class PuzzleServerNet {
 	public static void onInitialize() {
-		ServerSidePacketRegistry.INSTANCE.register(PuzzleMessages.UNDO, (ctx, buf) -> ctx.getTaskQueue().execute(() -> onPuzzle(ctx, PuzzleRegion::undo)));
-		ServerSidePacketRegistry.INSTANCE.register(PuzzleMessages.REDO, (ctx, buf) -> ctx.getTaskQueue().execute(() -> onPuzzle(ctx, PuzzleRegion::redo)));
-		ServerSidePacketRegistry.INSTANCE.register(PuzzleMessages.CHECKPOINT, (ctx, buf) -> ctx.getTaskQueue().execute(() -> onPuzzle(ctx, (r, world) -> {
-			r.snapshot(world, "manual-checkpoint");
-		})));
+		//TODO make this better...
+		ServerSidePacketRegistry.INSTANCE.register(PuzzleMessages.UNDO, (ctx, buf) -> onPuzzle(ctx, (region, world, player) -> {
+			region.undo(world);
+			PlayerStream.world(world).filter(region::entityInside).forEach(p -> {
+				p.sendMessage(new TranslatableText(Init.MODID + ".toast.undo"), true);
+			});
+		}));
+		ServerSidePacketRegistry.INSTANCE.register(PuzzleMessages.REDO, (ctx, buf) -> onPuzzle(ctx, (region, world, player) -> {
+			region.redo(world);
+			PlayerStream.world(world).filter(region::entityInside).forEach(p -> {
+				p.sendMessage(new TranslatableText(Init.MODID + ".toast.redo"), true);
+			});
+		}));
+		ServerSidePacketRegistry.INSTANCE.register(PuzzleMessages.CHECKPOINT, (ctx, buf) -> onPuzzle(ctx, (region, world, player) -> {
+			region.snapshot(world, "manual-checkpoint");
+			PlayerStream.world(world).filter(region::entityInside).forEach(p -> {
+				p.sendMessage(new TranslatableText(Init.MODID + ".toast.checkpoint"), true);
+			});
+		}));
 	}
 	
-	private static void onPuzzle(PacketContext ctx, BiConsumer<PuzzleRegion, ServerWorld> thing) {
-		ServerPlayerEntity player = (ServerPlayerEntity) ctx.getPlayer();
-		ServerWorld world = player.getServerWorld();
-		PuzzleRegionStateManager.getFor(player.getServerWorld()).getRegionIntersecting(player.getBlockPos()).ifPresent(r -> thing.accept(r, world));
+	private static void onPuzzle(PacketContext ctx, TriConsumer<PuzzleRegion, ServerWorld, ServerPlayerEntity> thing) {
+		ctx.getTaskQueue().execute(() -> {
+			ServerPlayerEntity player = (ServerPlayerEntity) ctx.getPlayer();
+			ServerWorld world = player.getServerWorld();
+			PuzzleRegionStateManager.getFor(player.getServerWorld()).getRegionIntersecting(player.getBlockPos()).ifPresent(r -> thing.accept(r, world, player));
+		});
 	}
 	
 	public static void syncPuzzleRegions(RegistryKey<World> worldKey, Stream<PlayerEntity> players, List<PuzzleRegion> regions, boolean full) {

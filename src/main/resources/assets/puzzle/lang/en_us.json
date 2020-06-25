@@ -3,6 +3,16 @@
   
   "puzzle.create.error.too_big": "This puzzle is too big (volume %s, max volume %s)",
   
+  "block.puzzle.large_solid_metal": "Portal - Large Solid Metal",
+  "block.puzzle.large_solid_white": "Portal - Large Solid White",
+  "block.puzzle.small_solid_metal": "Portal - Small Solid Metal",
+  "block.puzzle.small_solid_white": "Portal - Small Solid White",
+  "block.puzzle.one_metal": "Portal - One Face Metal",
+  "block.puzzle.one_white": "Portal - One Face White",
+  "block.puzzle.metal_pillar": "Portal - Metal Pillar",
+  "block.puzzle.white_pillar": "Portal - White Pillar",
+  
+  
   "item.puzzle.cheatsey_item": "Cheatsey Item",
   "item.puzzle.cheatsey_item.tooltip": "If this is in your inventory, you can",
   "item.puzzle.cheatsey_item.tooltip2": "bypass command permission checks (Testing item)",
@@ -10,5 +20,9 @@
   "puzzle.key_category": "Puzzle Mod",
   "puzzle.key.undo": "Undo",
   "puzzle.key.redo": "Redo",
-  "puzzle.key.checkpoint": "Manual Checkpoint"
+  "puzzle.key.checkpoint": "Manual Checkpoint",
+  
+  "puzzle.toast.undo": "Undo",
+  "puzzle.toast.redo": "Redo",
+  "puzzle.toast.checkpoint": "Created a manual checkpoint"
 }

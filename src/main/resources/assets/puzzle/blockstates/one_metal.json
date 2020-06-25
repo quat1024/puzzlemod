@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "puzzle:block/one_metal",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "puzzle:block/one_metal",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "puzzle:block/one_metal",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "puzzle:block/one_metal",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "puzzle:block/one_metal"
+    },
+    "facing=west": {
+      "model": "puzzle:block/one_metal",
+      "x": 90,
+      "y": 270
+    }
+  }
+}
