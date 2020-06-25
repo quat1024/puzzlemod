@@ -1,16 +1,13 @@
 package agency.highlysuspect.puzzle.client;
 
 import agency.highlysuspect.puzzle.mixin.client.WorldRendererAccessor;
-import agency.highlysuspect.puzzle.puzzle.PuzzleRegion;
 import agency.highlysuspect.puzzle.world.ClientPuzzleRegionStateManagerManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.*;
-import net.minecraft.client.render.debug.DebugRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix4f;
-import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 
 import java.util.OptionalDouble;
@@ -36,12 +33,16 @@ public class PuzzleRegionRenderer {
 		ClientPuzzleRegionStateManagerManager.get(world.getRegistryKey()).regionStream().forEach(region -> {
 			BlockPos a = region.getStart();
 			BlockPos b = region.getEnd();
-			WorldRenderer.drawBox(matrices, lineConsumer, a.getX(), a.getY(), a.getZ(), b.getX(), b.getY(), b.getZ(), 0.8f, 0.4f, 0.2f, 1f);
+			drawBoxCooler(matrices, lineConsumer, region.getStart(), region.getEnd(), 0.8f, 0.4f, 0.2f, 1f);
 		});
 		
 		((WorldRendererAccessor) renderer).puzzle$renderLayer(Asdf.LINES, matrices, x, y, z);
 		
 		matrices.pop();
+	}
+	
+	private static void drawBoxCooler(MatrixStack matrices, VertexConsumer consumer, BlockPos a, BlockPos b, float red, float green, float blue, float alpha) {
+		WorldRenderer.drawBox(matrices, consumer, a.getX(), a.getY(), a.getZ(), b.getX(), b.getY(), b.getZ(), red, green, blue, alpha);
 	}
 	
 	//Can I have an Access Widener?

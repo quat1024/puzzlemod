@@ -1,0 +1,14 @@
+{
+  "puzzle.disconnect.create_puzzle": "You are not allowed to create new puzzles",
+  
+  "puzzle.create.error.too_big": "This puzzle is too big (volume %s, max volume %s)",
+  
+  "item.puzzle.cheatsey_item": "Cheatsey Item",
+  "item.puzzle.cheatsey_item.tooltip": "If this is in your inventory, you can",
+  "item.puzzle.cheatsey_item.tooltip2": "bypass command permission checks (Testing item)",
+  
+  "puzzle.key_category": "Puzzle Mod",
+  "puzzle.key.undo": "Undo",
+  "puzzle.key.redo": "Redo",
+  "puzzle.key.checkpoint": "Manual Checkpoint"
+}

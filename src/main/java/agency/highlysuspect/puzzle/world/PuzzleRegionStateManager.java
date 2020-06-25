@@ -24,6 +24,7 @@ public class PuzzleRegionStateManager extends PersistentState {
 	}
 	
 	private final Map<String, PuzzleRegion> regions = new HashMap<>();
+	private boolean needsFullSync = false;
 	
 	public void putRegion(PuzzleRegion region) {
 		regions.put(region.getName(), region);
@@ -52,6 +53,17 @@ public class PuzzleRegionStateManager extends PersistentState {
 		return Optional.ofNullable(regions.get(name));
 	}
 	
+	public void removeRegion(PuzzleRegion region) {
+		removeRegionByName(region.getName());
+	}
+	
+	public void removeRegionByName(String name) {
+		regions.remove(name);
+		//TODO better syncing solution than this lazy ass way
+		needsFullSync = true;
+		markDirty();
+	}
+	
 	public Optional<PuzzleRegion> getRegionIntersecting(BlockPos pos) {
 		return regions.values().stream().filter(r -> r.contains(pos)).findFirst();
 	}
@@ -71,9 +83,14 @@ public class PuzzleRegionStateManager extends PersistentState {
 		regionList.forEach(this::putRegion);
 	}
 	
-	public void handlePartialSync(ServerWorld world) {
-		List<PuzzleRegion> needsSync = regionStream().filter(PuzzleRegion::needsSync).collect(Collectors.toList());
-		PuzzleServerNet.syncPuzzleRegions(world.getRegistryKey(), PlayerStream.world(world), needsSync, false);
-		needsSync.forEach(r -> r.setNeedsSync(false));
+	public void handleSync(ServerWorld world) {
+		if(needsFullSync) {
+			needsFullSync = false;
+			PuzzleServerNet.syncPuzzleRegions(world.getRegistryKey(), PlayerStream.world(world), getRegionListCopy(), true);
+		} else {
+			List<PuzzleRegion> needsSync = regionStream().filter(PuzzleRegion::needsSync).collect(Collectors.toList());
+			PuzzleServerNet.syncPuzzleRegions(world.getRegistryKey(), PlayerStream.world(world), needsSync, false);
+			needsSync.forEach(r -> r.setNeedsSync(false));
+		}
 	}
 }

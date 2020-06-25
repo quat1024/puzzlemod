@@ -1,50 +1,59 @@
 package agency.highlysuspect.puzzle.puzzle;
 
-import agency.highlysuspect.puzzle.Init;
+import agency.highlysuspect.puzzle.etc.Bullshit;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Supplier;
+import java.util.*;
 import java.util.stream.IntStream;
 
 public class PuzzleSnapshot {
-	public PuzzleSnapshot() {}
+	public PuzzleSnapshot(String reason) {
+		this.reason = reason;
+	}
 	
-	public PuzzleSnapshot(BlockState[] palette, int[] states, List<CompoundTag> beTags, List<CompoundTag> entityTags) {
+	private PuzzleSnapshot(String reason, BlockState[] palette, int[] states, List<CompoundTag> beTags, List<CompoundTag> entityTags, List<PlayerInfo> players) {
+		this(reason);
 		this.palette = palette;
 		this.states = states;
 		this.beTags = beTags;
 		this.entityTags = entityTags;
+		this.players = players;
 	}
+	
+	private final String reason;
 	
 	private BlockState[] palette;
 	private int[] states;
 	//Quick note that Codec's return immutable lists, so don't assume these to be mutable
+	//I overwrite instead of mutating these when I take a snapshot
 	private List<CompoundTag> beTags;
 	private List<CompoundTag> entityTags;
+	private List<PlayerInfo> players;
 	
 	public void takeSnapshot(ServerWorld world, PuzzleRegion region) {
 		try {
-			int blockCount = (region.getEnd().getX() - region.getStart().getX()) * (region.getEnd().getY() - region.getStart().getY()) * (region.getEnd().getZ() - region.getStart().getZ());
+			int blockCount = Bullshit.blockPosVolume(region.getStart(), region.getEnd());
 			
-			palette = null;
+			palette = new BlockState[0];
 			states = new int[blockCount];
 			beTags = new ArrayList<>();
 			entityTags = new ArrayList<>();
+			players = new ArrayList<>();
+			
+			if(blockCount == 0) return;
 			
 			//save paletted states and block entities
 			int i = 0;
@@ -69,15 +78,28 @@ public class PuzzleSnapshot {
 			}
 			palette = paletteList.toArray(new BlockState[0]);
 			
+			Box box = new Box(region.getStart(), region.getEnd());
+			
 			//save entities
-			for (Entity e : world.getEntities((Entity) null, new Box(region.getStart(), region.getEnd()), e -> {
+			for(Entity e : world.getEntities((Entity) null, box, e -> {
 				return !(e instanceof PlayerEntity);
 			})) {
 				CompoundTag uwu = new CompoundTag();
 				e.saveSelfToTag(uwu);
 				entityTags.add(uwu);
 			}
-		} catch(Exception e) { e.printStackTrace(); }
+			
+			//save players
+			for(PlayerEntity e : world.getEntities(EntityType.PLAYER, box, e -> true)) {
+				players.add(new PlayerInfo(
+					e.getUuid(),
+					e.getPos(),
+					e.pitch,
+					e.yaw,
+					e.getVelocity()
+				));
+			}
+		} catch(Exception e) { e.printStackTrace(); } //TODO remove this debugging
 	}
 	
 	public void restoreSnapshot(ServerWorld world, PuzzleRegion region) {
@@ -100,29 +122,74 @@ public class PuzzleSnapshot {
 			}
 		}
 		
-		//summon entities
 		for(CompoundTag tag : entityTags) {
 			UUID uuid = tag.getUuid("UUID");
-			Entity existingEntity = world.getEntity(uuid);
-			//kinda calling an internal method here.
-			//however: re-spawning with the same UUID would fail
-			//and just calling entity.remove would only remove it at the next tick
-			if(existingEntity != null) world.removeEntity(existingEntity);
 			
+			//delete entities that exist in both the world and the snapshot
+			Entity existingEntity = world.getEntity(uuid);
+			if(existingEntity != null) world.removeEntity(existingEntity);
+		}
+		
+		//delete entities that exist in the space the snapshot is occupying
+		for(Entity e : world.getEntities((Entity) null, new Box(region.getStart(), region.getEnd()), e -> {
+			return !(e instanceof PlayerEntity);
+		})) {
+			world.removeEntity(e);
+		}
+		
+		//summon new entities
+		for(CompoundTag tag : entityTags) {
 			EntityType.getEntityFromTag(tag, world).ifPresent(world::spawnEntity);
 		}
+		
+		//load players
+		for(PlayerInfo info : players) {
+			Entity e = world.getEntity(info.uuid);
+			if(e instanceof ServerPlayerEntity) {
+				Set<PlayerPositionLookS2CPacket.Flag> memes = new HashSet<>(Arrays.asList(PlayerPositionLookS2CPacket.Flag.values()));
+				((ServerPlayerEntity) e).networkHandler.teleportRequest(info.position.x, info.position.y, info.position.z, info.yaw, info.pitch, memes);
+				
+				e.setVelocity(info.motion);
+				((ServerPlayerEntity) e).velocityDirty = true;
+			}
+		}
+	}
+	
+	public static class PlayerInfo {
+		public PlayerInfo(UUID uuid, Vec3d position, float pitch, float yaw, Vec3d motion) {
+			this.uuid = uuid;
+			this.position = position;
+			this.pitch = pitch;
+			this.yaw = yaw;
+			this.motion = motion;
+		}
+		
+		public final UUID uuid;
+		public final Vec3d position;
+		public final float pitch;
+		public final float yaw;
+		public final Vec3d motion;
+		
+		public static final Codec<PlayerInfo> CODEC = RecordCodecBuilder.create(r -> r.group(
+			Bullshit.UUID_CODEC.fieldOf("uuid").forGetter(i -> i.uuid),
+			Bullshit.VEC3D_CODEC.fieldOf("position").forGetter(i -> i.position),
+			Codec.FLOAT.fieldOf("pitch").forGetter(i -> i.pitch),
+			Codec.FLOAT.fieldOf("yaw").forGetter(i -> i.yaw),
+			Bullshit.VEC3D_CODEC.fieldOf("motion").forGetter(i -> i.motion)
+		).apply(r, PlayerInfo::new));
 	}
 	
 	//Someone stop me! I'm having entirely too much fun with this
 	public static final Codec<PuzzleSnapshot> CODEC = RecordCodecBuilder.create(r -> r.group(
+		Codec.STRING.fieldOf("reason").forGetter(snap -> snap.reason),
 		arrayOf(BlockState.CODEC, new BlockState[0]).fieldOf("palette").forGetter(snap -> snap.palette),
 		Codec.INT_STREAM.fieldOf("states").xmap(IntStream::toArray, IntStream::of).forGetter(snap -> snap.states),
 		CompoundTag.field_25128.listOf().fieldOf("block_entities").forGetter(snap -> snap.beTags),
-		CompoundTag.field_25128.listOf().fieldOf("entities").forGetter(snap -> snap.entityTags)
+		CompoundTag.field_25128.listOf().fieldOf("entities").forGetter(snap -> snap.entityTags),
+		PlayerInfo.CODEC.listOf().fieldOf("players").forGetter(snap -> snap.players)
 	).apply(r, PuzzleSnapshot::new));
 	
 	private static <T> Codec<T[]> arrayOf(Codec<T> codec, T[] poot) {
-		//noinspection unchecked
 		return codec.listOf().xmap(list -> list.toArray(poot), Arrays::asList);
 	}
 }

@@ -1,6 +1,5 @@
 package agency.highlysuspect.puzzle.mixin;
 
-import agency.highlysuspect.puzzle.Init;
 import agency.highlysuspect.puzzle.net.PuzzleServerNet;
 import agency.highlysuspect.puzzle.world.PuzzleRegionStateManager;
 import net.minecraft.entity.Entity;
